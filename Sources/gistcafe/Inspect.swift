@@ -1,10 +1,10 @@
 import Foundation
 
-class Inspect {
+public class Inspect {
 
-    static var verbose = false
+    public static var verbose = false
     
-    static func log(to filePath: String, _ text: String) {
+    public static func log(to filePath: String, _ text: String) {
         let data = text.data(using: .utf8)!
         if let dir = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first {
             let logFile = dir.appendingPathComponent(filePath)
@@ -20,7 +20,7 @@ class Inspect {
         }
     }
 
-    static func vars<T: Encodable>(_ obj: [String:T]) {
+    public static func vars<T: Encodable>(_ obj: [String:T]) {
 
         let encoder = JSONEncoder()
         if let data = try? encoder.encode(obj) {
@@ -51,7 +51,7 @@ class Inspect {
         }
     }
 
-    static func dump<T: Encodable>(_ obj: T) -> String {
+    public static func dump<T: Encodable>(_ obj: T) -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         if let data = try? encoder.encode(obj) {
@@ -64,64 +64,62 @@ class Inspect {
         }
     }
 
-    static func printDump<T: Encodable>(_ obj: T) {
+    public static func printDump<T: Encodable>(_ obj: T) {
         print(Inspect.dump(obj))
     }
 
-    class Table {
-        static func alignLeft(_ str: String, length: Int, pad: String = " ") -> String {
-            if length < 0  {
-                return ""
-            }
-            let alen = length + 1 - str.length
-            if alen <= 0 {
-                return str
-            }            
-            return pad + str + String(repeating:pad, count:length + 1 - str.length)
+    static func alignLeft(_ str: String, length: Int, pad: String = " ") -> String {
+        if length < 0  {
+            return ""
         }
-
-        static func alignCenter(_ str: String, length: Int, pad: String = " ") -> String {
-            if length < 0  {
-                return ""
-            }
-            let nLen = str.length
-            let half = Int(floor(Double(length) / 2.0 - Double(nLen) / 2.0))
-            let odds = abs((nLen % 2) - (length % 2))
-            return String(repeating:pad, count:half + 1) + str + String(repeating:pad, count:half + 1 + odds)
-        }
-
-        static func alignRight(_ str: String, length: Int, pad: String = " ") -> String {
-            if length < 0  {
-                return ""
-            }
-            let alen = length + 1 - str.length
-            if alen <= 0 {
-                return str
-            }            
-            return String(repeating:pad, count:length + 1 - str.length) + str + pad
-        }
-
-        static func alignAuto(_ obj: AnyObject?, length: Int, pad: String = " ") -> String {
-            let str = obj == nil ? "" : "\(obj!)"
-            if str.length <= length {
-                if let o = obj, isNumber(o) {
-                    return alignRight(fmtNumber(o)!, length:length, pad:pad)
-                }
-                return alignLeft(str, length:length, pad:pad)
-            }
+        let alen = length + 1 - str.length
+        if alen <= 0 {
             return str
-        }
+        }            
+        return pad + str + String(repeating:pad, count:length + 1 - str.length)
     }
 
-    static func isNumber(_ obj:AnyObject) -> Bool {
+    static func alignCenter(_ str: String, length: Int, pad: String = " ") -> String {
+        if length < 0  {
+            return ""
+        }
+        let nLen = str.length
+        let half = Int(floor(Double(length) / 2.0 - Double(nLen) / 2.0))
+        let odds = abs((nLen % 2) - (length % 2))
+        return String(repeating:pad, count:half + 1) + str + String(repeating:pad, count:half + 1 + odds)
+    }
+
+    static func alignRight(_ str: String, length: Int, pad: String = " ") -> String {
+        if length < 0  {
+            return ""
+        }
+        let alen = length + 1 - str.length
+        if alen <= 0 {
+            return str
+        }            
+        return String(repeating:pad, count:length + 1 - str.length) + str + pad
+    }
+
+    static func alignAuto(_ obj: AnyObject?, length: Int, pad: String = " ") -> String {
+        let str = obj == nil ? "" : "\(obj!)"
+        if str.length <= length {
+            if let o = obj, isNumber(o) {
+                return alignRight(fmtNumber(o)!, length:length, pad:pad)
+            }
+            return alignLeft(str, length:length, pad:pad)
+        }
+        return str
+    }
+
+    public static func isNumber(_ obj:AnyObject) -> Bool {
         return obj is Int || obj is Double
     }
 
-    static func fmtNumber(_ obj:AnyObject) -> String? {
+    public static func fmtNumber(_ obj:AnyObject) -> String? {
         return "\(obj)"        
     }
 
-    static func dumpTable<S: Sequence>(_ objs: S, columns: [String]? = nil) -> String where S.Element : Codable {
+    public static func dumpTable<S: Sequence>(_ objs: S, columns: [String]? = nil) -> String where S.Element : Codable {
         let rows = Array(objs)
         let mapRows = asArrayDictionary(rows)
         let keys = columns != nil
@@ -152,7 +150,7 @@ class Inspect {
         sb.append("+\(String(repeating:"-", count:rowWidth-2))+")
         var head = "|"
         for k in keys {
-            head += Table.alignCenter(k, length:colSizes[k]!) + "|"
+            head += alignCenter(k, length:colSizes[k]!) + "|"
         }
         sb.append(head)
         sb.append("+\(String(repeating:"-", count:rowWidth-2))+")
@@ -160,7 +158,7 @@ class Inspect {
         for row in mapRows {
             var to = "|"
             for k in keys {
-                to += Table.alignAuto(row[k], length:colSizes[k]!) + "|"
+                to += alignAuto(row[k], length:colSizes[k]!) + "|"
             }
             sb.append(to)
         }
@@ -169,16 +167,16 @@ class Inspect {
         return sb.joined(separator: "\n")
     }
 
-    static func printDumpTable<S: Sequence>(_ objs: S, columns: [String]? = nil) where S.Element : Codable {
+    public static func printDumpTable<S: Sequence>(_ objs: S, columns: [String]? = nil) where S.Element : Codable {
         print(dumpTable(objs, columns:columns))
     }
 
 
-    static func asArrayDictionary<T: Codable>(_ objs: [T]) -> [Dictionary<String, AnyObject>] {
+    public static func asArrayDictionary<T: Codable>(_ objs: [T]) -> [Dictionary<String, AnyObject>] {
         return objs.map { asDictionary($0) }.filter { $0 != nil }.map { $0! }
     }
 
-    static func asDictionary<T: Codable>(_ obj: T) -> Dictionary<String, AnyObject>? {
+    public static func asDictionary<T: Codable>(_ obj: T) -> Dictionary<String, AnyObject>? {
         do {
             let encoder = JSONEncoder()
             if let data = try? encoder.encode(obj), 
