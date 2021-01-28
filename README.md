@@ -72,7 +72,7 @@ Top 3 apple GitHub Repos:
     forks : 1900,
     watchers : 11744,
     language : Markdown,
-    description : This maintains proposals for changes and user-visible enhancements to the Swift Programming Language.
+    description : This maintains proposals for changes to the Swift Programming Language.
   },
   {
     name : swift-package-manager,
