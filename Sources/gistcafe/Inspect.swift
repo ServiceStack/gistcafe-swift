@@ -24,6 +24,7 @@ public class Inspect {
 
         let encoder = JSONEncoder()
         if let data = try? encoder.encode(obj) {
+            
             if var inspectVarsPath = ProcessInfo.processInfo.environment["INSPECT_VARS"] {
                 if let os = ProcessInfo.processInfo.environment["OS"], os.lowercased().contains("win") {
                     inspectVarsPath = inspectVarsPath.replacingOccurrences(of:"/", with:"\\")
@@ -31,8 +32,8 @@ public class Inspect {
                     inspectVarsPath = inspectVarsPath.replacingOccurrences(of:"\\", with:"/")
                 }
 
-                let filePath = FileManager.default.currentDirectoryPath.appendingPathComponent(inspectVarsPath)
-                let dirPath = filePath.pathComponents.prefix(filePath.pathComponents.count-1).reduce("", { $0.appendingPathComponent($1) })
+                let filePath = URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent(inspectVarsPath)
+                let dirPath = filePath.deletingLastPathComponent().relativePath
 
                 if !FileManager.default.fileExists(atPath: dirPath) {
                     do {
@@ -43,7 +44,7 @@ public class Inspect {
                 }
 
                 do {
-                    try data.write(to:URL(fileURLWithPath:filePath), options:.atomic)
+                    try data.write(to:filePath, options:.atomic)
                 } catch {
                     if verbose { print("vars() data.write: \(error.localizedDescription)") }
                 }
@@ -72,18 +73,18 @@ public class Inspect {
         if length < 0  {
             return ""
         }
-        let alen = length + 1 - str.length
+        let alen = length + 1 - str.count
         if alen <= 0 {
             return str
         }            
-        return pad + str + String(repeating:pad, count:length + 1 - str.length)
+        return pad + str + String(repeating:pad, count:length + 1 - str.count)
     }
 
     static func alignCenter(_ str: String, length: Int, pad: String = " ") -> String {
         if length < 0  {
             return ""
         }
-        let nLen = str.length
+        let nLen = str.count
         let half = Int(floor(Double(length) / 2.0 - Double(nLen) / 2.0))
         let odds = abs((nLen % 2) - (length % 2))
         return String(repeating:pad, count:half + 1) + str + String(repeating:pad, count:half + 1 + odds)
@@ -93,16 +94,16 @@ public class Inspect {
         if length < 0  {
             return ""
         }
-        let alen = length + 1 - str.length
+        let alen = length + 1 - str.count
         if alen <= 0 {
             return str
         }            
-        return String(repeating:pad, count:length + 1 - str.length) + str + pad
+        return String(repeating:pad, count:length + 1 - str.count) + str + pad
     }
 
     static func alignAuto(_ obj: AnyObject?, length: Int, pad: String = " ") -> String {
         let str = obj == nil ? "" : "\(obj!)"
-        if str.length <= length {
+        if str.count <= length {
             if let o = obj, isNumber(o) {
                 return alignRight(fmtNumber(o)!, length:length, pad:pad)
             }
@@ -128,10 +129,10 @@ public class Inspect {
         var colSizes = Dictionary<String,Int>()
         
         for k in keys {
-            var max = k.length
+            var max = k.count
             for row in mapRows {
                 if let col = row[k] {
-                    let valSize = "\(col)".length
+                    let valSize = "\(col)".count
                     if valSize > max {
                         max = valSize
                     }

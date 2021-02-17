@@ -1,6 +1,5 @@
 import XCTest
 import Foundation
-import FoundationNetworking
 
 @testable import gistcafe
 
